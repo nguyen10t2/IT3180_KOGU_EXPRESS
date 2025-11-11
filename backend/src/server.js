@@ -1,0 +1,26 @@
+import express from 'express';
+import dotenv from 'dotenv';
+import { connectDB } from './libs/db.js';
+import authRoute from './routes/authRoute.js';
+import userRoute from './routes/userRoute.js';
+import cookieParser from 'cookie-parser';
+import { verifyJWT } from './middlewares/authMiddleware.js';
+
+dotenv.config();
+
+const app = express();
+const IP_ADDRESS = process.env.IP_ADDRESS || 'localhost';
+const PORT = process.env.PORT || 8080;
+
+app.use(express.json());
+app.use(cookieParser());
+
+app.use('/api/auth', authRoute);
+
+app.use('/api/users', userRoute);
+
+connectDB().then(() => {
+    app.listen(PORT, () => {
+        console.log('Đang chạy ở http://' + IP_ADDRESS + ':' + PORT);
+    });
+});

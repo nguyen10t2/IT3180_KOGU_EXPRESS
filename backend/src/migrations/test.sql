@@ -1,0 +1,5 @@
+-- Active: 1760956445253@@127.0.0.1@5432@mydb@public
+SELECT * FROM users;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS session;
+DROP TABLE IF EXISTS otp_tokens;
