@@ -8,6 +8,7 @@ import { EmailService } from '../services/EmailService.js';
 import { OtpService } from '../services/OtpService.js';
 import { validateEmail, validatePassword, validateFullname, validateOtp } from '../validations/validation.js';
 import { ResetToken } from '../models/ResetToken.js';
+import { log } from 'console';
 
 
 const ACCESS_TOKEN_TTL = '15m';
@@ -123,6 +124,9 @@ export const logout = async (req, res) => {
             await Session.deleteOne({ refresh_token: token });
             res.clearCookie('refresh_token');
         }
+
+        console.log('Đăng xuất thành công');
+        
 
         return res.sendStatus(204);
     } catch (error) {
@@ -285,8 +289,6 @@ export const forgetPass = async (req, res) => {
             maxAge: RESET_TOKEN_TTL,
         });
 
-        res.status(200).json({ message: 'Đã gửi OTP' });
-
         (async () => {
             try {
                 await new EmailService().sendOtpEmail(email, plain_otp);
@@ -295,6 +297,8 @@ export const forgetPass = async (req, res) => {
                 console.error(`Lỗi khi gửi OTP:`, err);
             }
         })();
+
+        return res.status(200).json({ message: 'Đã gửi OTP' });
     } catch (error) {
         console.error('Lỗi khi gọi forgetPass', error);
         return res.status(500).json({ message: 'Lỗi hệ thống' });
@@ -304,7 +308,7 @@ export const forgetPass = async (req, res) => {
 export const resetPass = async (req, res) => {
     try {
         const { email, new_password } = req.body;
-
+        
         const reset_token = req.cookies?.reset_token;
 
         const tokenData = await ResetToken.findOne({ email, reset_token });
@@ -318,9 +322,11 @@ export const resetPass = async (req, res) => {
         if (!check.valid) return res.status(400).json({ message: check.message });
 
         const password_hash = await argon2.hash(new_password);
-
         await User.updateUser({ email: email, new_password: password_hash });
         await ResetToken.deleteOne({ email: email });
+        console.log('Đã xoá reset token sau khi đổi mật khẩu thành công');
+        
+        
 
         res.clearCookie('reset_token', {
             httpOnly: true,

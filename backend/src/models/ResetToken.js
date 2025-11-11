@@ -4,7 +4,7 @@ export const ResetToken = {
     async create({email, reset_token, expires_at}) {
         const res = await pool.query(
             `INSERT INTO reset_tokens (email, reset_token, expires_at)
-            VALUE ($1, $2, $3)
+            VALUES ($1, $2, $3)
             RETURNING *`,
             [email, reset_token, expires_at]
         );
@@ -23,7 +23,7 @@ export const ResetToken = {
     async deleteOne({email}) {
         await pool.query(
             `DELETE FROM reset_tokens
-            WHERE email = $1 expires_at < NOW() - INTERVAL '1 day'`
+            WHERE email = $1 OR expires_at < NOW() - INTERVAL '1 day'`,
             [email]
         );
     }
