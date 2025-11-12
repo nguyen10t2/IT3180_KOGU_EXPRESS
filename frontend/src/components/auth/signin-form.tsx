@@ -7,27 +7,24 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { signInSchema } from "@/validation/authSchema";
 import type { SignInFormValues } from "@/validation/authSchema";
-import { useAuthStore } from "@/stores/useAuthStore";
-import { useNavigate } from "react-router";
+
+type SigninFormProps = {
+  onSubmit: (data: SignInFormValues) => Promise<void>;
+  isLoading?: boolean;
+  className?: string;
+};
 
 export function SigninForm({
   className,
-  ...props
-}: React.ComponentProps<"div">) {
-  const { signIn } = useAuthStore();
-  const navigate = useNavigate();
+  onSubmit,
+  isLoading = false,
+}: SigninFormProps) {
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<SignInFormValues>({
     resolver: zodResolver(signInSchema),
   });
 
-  const onSubmit = async (data: SignInFormValues) => {
-    const { email, password } = data;
-    await signIn(email, password);
-    navigate("/home");
-  };
-
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div className={cn("flex flex-col gap-6", className)}>
       <Card className="overflow-hidden p-0 border-border">
         <CardContent className="grid p-0 md:grid-cols-2">
           <form className="p-4 md:p-6 w-full" onSubmit={handleSubmit(onSubmit)}>
@@ -70,7 +67,7 @@ export function SigninForm({
                   <div className="flex items-center justify-between">
                     <Label htmlFor="password" className="text-sm">Mật khẩu</Label>
                     <a
-                      href="#"
+                      href="/forgot-password"
                       className="text-sm underline-offset-4 hover:underline"
                     >
                       Quên mật khẩu?
@@ -98,9 +95,9 @@ export function SigninForm({
               <Button
                 type="submit"
                 className="w-full"
-                disabled={isSubmitting}
+                disabled={isSubmitting || isLoading}
               >
-                Đăng nhập
+                {isSubmitting || isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
               </Button>
 
               <div className="text-center text-sm">

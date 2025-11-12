@@ -43,5 +43,20 @@ export const authService = {
       { withCredentials: true }
     );
     return res.data.token;
+  },
+
+  forgetPassword: async (email: string) => {
+    const res = await api.post("/api/auth/forget-password", { email }, { withCredentials: true });
+    return res.data;
+  },
+
+  verifyOtpForReset: async (email: string, otp: string) => {
+    const res = await api.post("/api/auth/verify-otp", { email, otp }, { withCredentials: true });
+    return res.data;
+  },
+
+  resetPassword: async (email: string, new_password: string) => {
+    const res = await api.post("/api/auth/reset-password", { email, new_password }, { withCredentials: true });
+    return res.data;
   }
 };

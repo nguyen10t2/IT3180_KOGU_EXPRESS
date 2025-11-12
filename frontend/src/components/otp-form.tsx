@@ -16,23 +16,35 @@ import {
 import { useNavigate } from "react-router"
 import { useState } from "react"
 import otpService from "@/services/otpService"
+import { authService } from "@/services/authService"
 import { toast } from "sonner"
-export function OTPForm({ className, ...props }: React.ComponentProps<"div">) {
 
+type OTPFormProps = React.ComponentProps<"div"> & {
+  mode?: "signup" | "reset" // Chế độ: đăng ký hoặc reset password
+}
+
+export function OTPForm({ className, mode = "signup", ...props }: OTPFormProps) {
   const navigate = useNavigate()
   const [ otp, setOtp ] = useState("")
   const [ loading, setLoading ] = useState(false)
   const [ error, setError ] = useState("")
+  
+  // Lấy email và key tương ứng với mode
+  const emailKey = mode === "signup" ? "signupEmail" : "resetEmail"
+  const errorMessage = mode === "signup" 
+    ? "Không tìm thấy email đăng ký. Vui lòng quay lại trang đăng ký."
+    : "Không tìm thấy email. Vui lòng quay lại trang quên mật khẩu."
+  const successRoute = mode === "signup" ? "/signin" : "/reset-password"
   
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setError("")
     setLoading(true)
 
-    // Lấy email từ localStorage (được lưu khi đăng ký)
-    const email = localStorage.getItem('signupEmail') || ""
+    // Lấy email từ localStorage
+    const email = localStorage.getItem(emailKey) || ""
     if (!email) {
-      setError("Không tìm thấy email đăng ký. Vui lòng quay lại trang đăng ký.")
+      setError(errorMessage)
       setLoading(false)
       return
     }
@@ -45,30 +57,46 @@ export function OTPForm({ className, ...props }: React.ComponentProps<"div">) {
     }
 
     try {
-      const resp = await otpService.verifyOtp({ email, otp })
+      // Gọi service tương ứng với mode
+      const resp = mode === "signup" 
+        ? await otpService.verifyOtp({ email, otp })
+        : await authService.verifyOtpForReset(email, otp)
+      
       toast.success(resp.message || 'Xác thực thành công')
-      localStorage.removeItem('signupEmail')
-      console.log('About to navigate to /signin')
-      navigate('/signin')
+      
+      // Chỉ xóa email khi signup thành công
+      if (mode === "signup") {
+        localStorage.removeItem(emailKey)
+      }
+      
+      console.log(`About to navigate to ${successRoute}`)
+      navigate(successRoute)
     } catch (err: any) {
-      toast.error('Xác thực không thành công')
+      const errMsg = err.response?.data?.message || 'Xác thực không thành công'
+      setError(errMsg)
+      toast.error(errMsg)
       setLoading(false)
     }
   }
+  
   const onResend = async (e: React.MouseEvent) => {
     e.preventDefault()
     setError("")
     setLoading(true)
 
-    const email = localStorage.getItem('signupEmail') || ""
+    const email = localStorage.getItem(emailKey) || ""
     if (!email) {
-      setError("Không tìm thấy email đăng ký. Vui lòng quay lại trang đăng ký.")
+      setError(errorMessage)
       setLoading(false)
       return
     }
 
     try {
-      const resp = await otpService.resendOtp({ email })
+      // Gọi service tương ứng với mode
+      const resp = mode === "signup"
+        ? await otpService.resendOtp({ email })
+        : await authService.forgetPassword(email)
+      
       toast.success(resp.message || 'Mã OTP đã được gửi lại')
     } catch (err: any) {
       console.error('Resend OTP error', err)

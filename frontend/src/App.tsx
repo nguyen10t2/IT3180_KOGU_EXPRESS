@@ -6,6 +6,9 @@ import { Toaster } from 'sonner'
 import ProtectedRoute from './components/auth/ProtectedRoute'
 import { Navigate } from 'react-router'
 import OTPPage from './pages/OtpPage'
+import ForgotPasswordPage from './pages/ForgotPasswordPage'
+import VerifyOtpResetPage from './pages/VerifyOtpResetPage'
+import ResetPasswordPage from './pages/ResetPasswordPage'
 
 function App() {
   return (
@@ -26,6 +29,21 @@ function App() {
               path='/otp'
               element={<OTPPage/>}
             />
+          
+          {/* Forgot Password Flow */}
+          <Route
+            path='/forgot-password'
+            element={<ForgotPasswordPage/>}
+          />
+          <Route
+            path='/verify-otp-reset'
+            element={<VerifyOtpResetPage/>}
+          />
+          <Route
+            path='/reset-password'
+            element={<ResetPasswordPage/>}
+          />
+
           {/* Protected routes */}
           <Route element={<ProtectedRoute/>}>
             <Route

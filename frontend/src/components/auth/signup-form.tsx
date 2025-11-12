@@ -7,15 +7,18 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { signUpSchema } from "@/validation/authSchema";
 import type { SignUpFormValues } from "@/validation/authSchema";
-import { useAuthStore } from "@/stores/useAuthStore";
-import { useNavigate } from "react-router";
+
+type SignupFormProps = {
+  onSubmit: (data: SignUpFormValues) => Promise<void>;
+  isLoading?: boolean;
+  className?: string;
+};
 
 export function SignupForm({
   className,
-  ...props
-}: React.ComponentProps<"div">) {
-  const { signUp } = useAuthStore();
-  const navigate = useNavigate();
+  onSubmit,
+  isLoading = false,
+}: SignupFormProps) {
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<SignUpFormValues>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
@@ -23,14 +26,8 @@ export function SignupForm({
     }
   });
 
-  const onSubmit = async (data: SignUpFormValues) => {
-    const { fullname, email, password, role } = data;
-    navigate("/otp");
-    await signUp(fullname, email, password, role);
-  };
-
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div className={cn("flex flex-col gap-6", className)}>
       <Card className="overflow-hidden p-0 border-border">
         <CardContent className="grid p-0 md:grid-cols-2">
           <form className="p-4 md:p-6 w-full" onSubmit={handleSubmit(onSubmit)}>
@@ -101,9 +98,9 @@ export function SignupForm({
               <Button
                 type="submit"
                 className="w-full"
-                disabled={isSubmitting}
+                disabled={isSubmitting || isLoading}
               >
-                Tạo tài khoản
+                {isSubmitting || isLoading ? "Đang tạo tài khoản..." : "Tạo tài khoản"}
               </Button>
 
               <div className="text-center text-sm">
