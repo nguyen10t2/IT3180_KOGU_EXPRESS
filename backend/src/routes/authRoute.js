@@ -1,6 +1,6 @@
 import express from 'express';
-import { register, login, logout, refreshToken, verifyOtp, resendOtp, forgetPass, resetPass } from '../controllers/authController.js';
-import { verifyRefreshToken } from '../middlewares/authMiddleware.js';
+import { register, login, logout, refreshToken, verifyOtp, resendOtp, forgetPass, resetPass, changePass } from '../controllers/authController.js';
+import { verifyJWT, verifyRefreshToken } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
@@ -17,6 +17,8 @@ router.post('/resend-otp', resendOtp);
 router.post('/forget-password', forgetPass);
 
 router.post('/reset-password', resetPass);
+
+router.post('/change-password', verifyJWT, changePass);
 
 router.post('/refresh', verifyRefreshToken, refreshToken);
 

@@ -4,13 +4,18 @@ import { connectDB } from './libs/db.js';
 import authRoute from './routes/authRoute.js';
 import userRoute from './routes/userRoute.js';
 import cookieParser from 'cookie-parser';
-import { verifyJWT } from './middlewares/authMiddleware.js';
+import cors from "cors";
 
 dotenv.config();
 
 const app = express();
 const IP_ADDRESS = process.env.IP_ADDRESS || 'localhost';
 const PORT = process.env.PORT || 8080;
+
+app.use(cors({
+    origin: `http://${IP_ADDRESS}:5173`,
+    credentials: true,
+}));
 
 app.use(express.json());
 app.use(cookieParser());

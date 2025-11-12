@@ -11,20 +11,8 @@ export const validatePassword = (password) => {
     if (!password) {
         return { valid: false, message: 'Password không được để trống' };
     }
-    if (password.length < 8) {
-        return { valid: false, message: 'Password phải ít nhất 8 ký tự' };
-    }
-    if (!/[A-Z]/.test(password)) {
-        return { valid: false, message: 'Password phải có ít nhất 1 chữ hoa' };
-    }
-    if (!/[a-z]/.test(password)) {
-        return { valid: false, message: 'Password phải có ít nhất 1 chữ thường' };
-    }
-    if (!/[0-9]/.test(password)) {
-        return { valid: false, message: 'Password phải có ít nhất 1 chữ số' };
-    }
-    if (!/[\W_]/.test(password)) {
-        return { valid: false, message: 'Password phải có ít nhất 1 ký tự đặc biệt' };
+    if (password.length < 6) {
+        return { valid: false, message: 'Password phải ít nhất 6 ký tự' };
     }
     return { valid: true };
 };
