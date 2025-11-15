@@ -90,14 +90,14 @@ api.interceptors.response.use(
             // Dùng refreshApi (không có interceptor) để gọi endpoint refresh
             // Cookies sẽ tự động được gửi kèm nhờ withCredentials: true
             const response = await refreshApi.post(
-                '/auth/refresh', 
+                '/api/auth/refresh', 
                 {},
                 { withCredentials: true }
             )
 
             console.log("Refresh response data:", response.data)  // Debug: xem toàn bộ response
             
-            const newToken = response.data.accessToken || response.data.token
+            const newToken = response.data.access_token
 
             if (!newToken) {
                 throw new Error('No token in refresh response. Response: ' + JSON.stringify(response.data))

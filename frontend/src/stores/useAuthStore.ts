@@ -1,26 +1,30 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import { toast } from "sonner";
 import { authService } from "@/services/authService";
 import type { AuthState } from "@/types/store";
 
-export const useAuthStore = create<AuthState>((set, get) => ({
-  accessToken: null,
-  user: null,
-  loading: false,
-
-  setAccessToken: (token: string) => {
-    set({ accessToken: token });
-  },
-
-  clearState: () => {
-    console.log("clearState called - removing all auth data");
-    localStorage.removeItem('userRole');
-    set({
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set, get) => ({
       accessToken: null,
       user: null,
-      loading: false
-    });
-  },
+      loading: false,
+
+      setAccessToken: (token: string) => {
+        console.log("Setting accessToken:", token);
+        set({ accessToken: token });
+      },
+
+      clearState: () => {
+        console.log("clearState called - removing all auth data");
+        localStorage.removeItem('userRole');
+        set({
+          accessToken: null,
+          user: null,
+          loading: false
+        });
+      },
 
   signUp: async (fullname, email, password, role) => {
     try {
@@ -117,4 +121,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ loading: false });
     }
   },
-}));
+}),
+    {
+      name: 'auth-storage',
+      partialize: (state) => ({ accessToken: state.accessToken }),
+    }
+  )
+);

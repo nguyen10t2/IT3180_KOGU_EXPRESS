@@ -11,7 +11,7 @@ export default function Sidebar() {
       <aside className="fixed left-0 top-0 h-screen w-64 bg-sidebar border-r border-sidebar-border flex flex-col">
         {/* Logo */}
         <div className="p-6 border-b border-sidebar-border">
-          <a href="/home  " className="flex items-center gap-3">
+          <a href="/home" className="flex items-center gap-3">
             <img src="/logo.svg" alt="Building Logo" className="w-10 h-10" />
             <span className="font-heading font-semibold text-lg text-sidebar-foreground">
               Building

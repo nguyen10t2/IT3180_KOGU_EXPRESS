@@ -38,35 +38,17 @@ export const verifyJWT = async (req, res, next) => {
 };
 
 export const authorize = (required_role) => {
-    return async (req, res, next) => {
-        try {
-            const authHeader = req.headers['authorization'];
-
-            const token = authHeader && authHeader.split(' ')[1];
-            if (!token) {
-                return res.status(401).json({ message: 'Không tìm thấy access_token' });
-            }
-
-            const decoded = await new Promise((resolve, reject) => {
-                jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
-                    if (err) reject(err);
-                    else resolve(decoded);
-                });
-            });
-
-            const role = decoded.user_role;
-            if (!role || !hasPermission(role, required_role)) {
-                return res.status(403).json({ message: 'Không đủ quyền truy cập' });
-            }
-
-            req.user = decoded;
-            next();
-
-        } catch (error) {
-            console.error('Lỗi khi xác minh JWT', error);
-
-            return res.status(401).json({ message: 'Access_token không hợp lệ hoặc hết hạn' });
+    return (req, res, next) => {
+        if (!req.user) {
+            return res.status(401).json({ message: 'Bạn chưa đăng nhập' });
         }
+
+        const role = req.user.user_role;
+        if (!role || !hasPermission(role, required_role)) {
+            return res.status(403).json({ message: 'Không đủ quyền truy cập' });
+        }
+
+        next();
     };
 };
 
