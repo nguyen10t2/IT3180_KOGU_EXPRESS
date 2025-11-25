@@ -1,6 +1,19 @@
 import pool from '../libs/db.js';
 
 export const User = {
+
+    async getUsersByLastCreatedAndLimit({ lastCreated, limit }) {
+        const res = await pool.query(
+            `SELECT user_id, email, fullname, role, status, created_at as create_at, updated_at
+            FROM users
+            WHERE created_at > $1
+            ORDER BY user_id
+            LIMIT $2`,
+            [lastCreated, limit]
+        );
+        return res.rows;
+    },
+
     async updateUser({ email, new_password }) {
         const res = await pool.query(
             `UPDATE users
@@ -71,13 +84,34 @@ export const User = {
         return res.rows[0];
     },
     
-    async updateStatus({ user_id, status }) {
+    async getPendingUsers() {
         const res = await pool.query(
-            `UPDATE users SET status = $1
-            WHERE user_id = $2
+            `SELECT user_id, email, fullname, role, status, created_at as create_at, updated_at
+            FROM users
+            WHERE status = 'pending'`,
+        );
+        return res.rows;
+    },
+
+    async approveUser({ user_id, approved_by }) {
+        const res = await pool.query(
+            `UPDATE users 
+            SET status = 'active', approved_by = $2, approved_at = NOW()
+            WHERE user_id = $1
             RETURNING *`,
-            [status, user_id]
+            [user_id, approved_by]
         );
         return res.rows[0];
     },
+
+    async rejectUser({ user_id, rejected_by, rejected_reason }) {
+        const res = await pool.query(
+            `UPDATE users 
+            SET status = 'rejected', approved_by = $2, approved_at = NOW(), rejected_reason = $3
+            WHERE user_id = $1
+            RETURNING *`,
+            [user_id, rejected_by, rejected_reason]
+        );
+        return res.rows[0];
+    }
 };

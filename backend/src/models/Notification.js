@@ -48,5 +48,25 @@ export const Notification = {
             [user_id, house_hold_id]
         );
         return res.rowCount;
+    },
+
+    async createScheduledNotification({ title, content, type, target, target_id, scheduled_at, created_by }) {
+        const res = await pool.query(
+            `INSERT INTO notifications (title, content, type, target, target_id, scheduled_at, published_at, created_by)
+             VALUES ($1, $2, $3, $4, $5, $6, $6, $7)
+             RETURNING *`,
+            [title, content, type || 'info', target || 'all', target_id, scheduled_at, created_by]
+        );
+        return res.rows[0];
+    },
+
+    async getScheduledNotifications() {
+        const res = await pool.query(
+            `SELECT * FROM notifications
+             WHERE scheduled_at IS NOT NULL 
+               AND scheduled_at > NOW()
+             ORDER BY scheduled_at ASC`
+        );
+        return res.rows;
     }
 };

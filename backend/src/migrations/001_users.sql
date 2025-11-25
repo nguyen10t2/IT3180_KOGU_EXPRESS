@@ -10,7 +10,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- ENUM TYPES
 -- =============================================
 CREATE TYPE user_role AS ENUM ('admin', 'manager', 'resident', 'accountant');
-CREATE TYPE user_status AS ENUM ('active', 'inactive');
+CREATE TYPE user_status AS ENUM ('active', 'pending', 'rejected');
 CREATE TYPE gender AS ENUM ('male', 'female', 'other');
 CREATE TYPE room_type AS ENUM ('single', 'double', 'studio', 'penthouse');
 CREATE TYPE house_role AS ENUM ('chuho', 'nguoidaidien', 'nguoithue', 'thanhvien');
@@ -84,9 +84,12 @@ CREATE TABLE users (
     fullname VARCHAR(100) NOT NULL,
     avatar_url TEXT,
     role user_role DEFAULT 'resident',
-    status user_status DEFAULT 'inactive',
+    status user_status DEFAULT 'pending',
     verified BOOLEAN DEFAULT FALSE,
     resident_id UUID REFERENCES residents(resident_id) ON DELETE SET NULL,
+    rejected_reason TEXT, -- lý do từ chối (nếu status = rejected)
+    approved_by UUID REFERENCES users(user_id) ON DELETE SET NULL, -- người phê duyệt
+    approved_at TIMESTAMP, -- thời gian phê duyệt
     last_login_at TIMESTAMP,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
@@ -188,6 +191,8 @@ CREATE TABLE invoices (
     payment_method payment_method,
     notes TEXT,
     created_by UUID REFERENCES users(user_id),
+    confirmed_by UUID REFERENCES users(user_id) ON DELETE SET NULL, -- người xác nhận thanh toán
+    confirmed_at TIMESTAMP, -- thời gian xác nhận thanh toán
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
@@ -243,6 +248,7 @@ CREATE TABLE notifications (
     target notification_target DEFAULT 'all',
     target_id UUID, -- house_hold_id hoặc user_id nếu target != 'all'
     is_pinned BOOLEAN DEFAULT FALSE, -- ghim thông báo
+    scheduled_at TIMESTAMP, -- thời gian lên lịch gửi thông báo
     published_at TIMESTAMP DEFAULT NOW(),
     expires_at TIMESTAMP, -- thời gian hết hạn hiển thị
     created_by UUID REFERENCES users(user_id),

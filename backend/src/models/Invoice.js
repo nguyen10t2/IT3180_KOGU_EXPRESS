@@ -68,5 +68,16 @@ export const Invoice = {
             [invoice_id]
         );
         return res.rows[0];
+    },
+
+    async confirmPayment({ invoice_id, confirmed_by }) {
+        const res = await pool.query(
+            `UPDATE invoices 
+             SET status = 'paid', confirmed_by = $2, confirmed_at = NOW(), paid_at = NOW()
+             WHERE invoice_id = $1 AND status = 'pending'
+             RETURNING *`,
+            [invoice_id, confirmed_by]
+        );
+        return res.rows[0];
     }
 };
