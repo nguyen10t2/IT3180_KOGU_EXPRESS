@@ -1,5 +1,5 @@
 import express from 'express';
-import { authorize, verifyJWT } from '../middlewares/authMiddleware';
+import { authorize, verifyJWT } from '../middlewares/authMiddleware.js';
 import {
     getInvoices,
     createInvoice,
@@ -7,8 +7,7 @@ import {
     updateInvoice,
     deleteInvoice,
     confirmInvoicePayment
-} from '../controllers/accountantController.js';
-
+} from '../controllers/managerController.js';
 
 const router = express.Router();
 
