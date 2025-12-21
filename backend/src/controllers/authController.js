@@ -9,7 +9,7 @@ import { OtpService } from '../services/OtpService.js';
 import { validateEmail, validatePassword, validateFullname, validateOtp } from '../validations/validation.js';
 import { ResetToken } from '../models/ResetToken.js';
 
-const ACCESS_TOKEN_TTL = '15m';
+const ACCESS_TOKEN_TTL = '30s';
 const REFRESH_TOKEN_TTL = 7 * 24 * 3600 * 1000;
 const RESET_TOKEN_TTL = 10 * 60 * 1000;
 

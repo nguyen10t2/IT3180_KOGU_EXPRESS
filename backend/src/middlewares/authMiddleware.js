@@ -32,7 +32,12 @@ export const verifyJWT = async (req, res, next) => {
 
         next();
     } catch (error) {
-
+        if (error.name === 'TokenExpiredError') {
+             return res.status(401).json({ message: 'Token đã hết hạn' });
+        }
+        if (error.name === 'JsonWebTokenError') {
+            return res.status(401).json({ message: 'Token không hợp lệ' });
+        }
         console.error('Lỗi khi xác minh JWT', error);
 
         return res.status(500).json({ message: 'Lỗi hệ thống' });
