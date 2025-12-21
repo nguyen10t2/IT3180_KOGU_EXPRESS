@@ -2,7 +2,13 @@
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   InputOTP,
   InputOTPGroup,
@@ -28,8 +34,8 @@ export function OTPForm({ className, mode = "signup" }: OTPFormProps) {
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [resending, setResending] = useState(false); // Helper state for resend button
 
-  // Get email key and messages based on mode
   const emailKey = mode === "signup" ? "signupEmail" : "resetEmail";
   const errorMessage =
     mode === "signup"
@@ -42,7 +48,6 @@ export function OTPForm({ className, mode = "signup" }: OTPFormProps) {
     setError("");
     setLoading(true);
 
-    // Get email from localStorage
     const email = localStorage.getItem(emailKey) || "";
     if (!email) {
       setError(errorMessage);
@@ -50,7 +55,6 @@ export function OTPForm({ className, mode = "signup" }: OTPFormProps) {
       return;
     }
 
-    // Validate OTP
     if (!otp || otp.length !== 6) {
       setError("Vui lòng nhập đầy đủ mã 6 chữ số");
       setLoading(false);
@@ -58,7 +62,6 @@ export function OTPForm({ className, mode = "signup" }: OTPFormProps) {
     }
 
     try {
-      // Call service based on mode
       const resp =
         mode === "signup"
           ? await otpService.verifyOtp({ email, otp })
@@ -66,7 +69,6 @@ export function OTPForm({ className, mode = "signup" }: OTPFormProps) {
 
       toast.success(resp.message || "Xác thực thành công");
 
-      // Only remove email on signup success
       if (mode === "signup") {
         localStorage.removeItem(emailKey);
       }
@@ -85,17 +87,16 @@ export function OTPForm({ className, mode = "signup" }: OTPFormProps) {
   const onResend = async (e: React.MouseEvent) => {
     e.preventDefault();
     setError("");
-    setLoading(true);
+    setResending(true);
 
     const email = localStorage.getItem(emailKey) || "";
     if (!email) {
       setError(errorMessage);
-      setLoading(false);
+      setResending(false);
       return;
     }
 
     try {
-      // Call service based on mode
       const resp =
         mode === "signup"
           ? await otpService.resendOtp({ email })
@@ -103,8 +104,6 @@ export function OTPForm({ className, mode = "signup" }: OTPFormProps) {
 
       toast.success(resp.message || "Mã OTP đã được gửi lại");
     } catch (err: unknown) {
-      console.error("Resend OTP error", err);
-
       const error = err as {
         response?: {
           status?: number;
@@ -113,7 +112,6 @@ export function OTPForm({ className, mode = "signup" }: OTPFormProps) {
         message?: string;
       };
 
-      // Handle rate limit (429)
       if (error?.response?.status === 429) {
         const retryAfter = error?.response?.data?.retry_after;
         const msg = retryAfter
@@ -130,48 +128,40 @@ export function OTPForm({ className, mode = "signup" }: OTPFormProps) {
         "Lỗi khi gửi lại mã OTP";
       toast.error(msg);
     } finally {
-      setLoading(false);
+      setResending(false);
     }
   };
 
   return (
-    <div className={cn("flex flex-col gap-6 md:min-h-[450px]", className)}>
-      <Card className="flex-1 overflow-hidden p-0">
-        <CardContent className="grid flex-1 p-0 md:grid-cols-2">
-          <form
-            className="flex flex-col items-center justify-center p-6 md:p-8"
-            onSubmit={onSubmit}
-          >
-            <div className="flex flex-col items-center gap-6 w-full max-w-sm">
-              {/* Header */}
-              <div className="flex flex-col items-center text-center gap-2">
-                <Link href="/" className="mx-auto block w-fit text-center">
-                  <Image
-                    src="/logo.svg"
-                    alt="logo"
-                    width={64}
-                    height={64}
-                    priority
-                  />
-                </Link>
-                <h1 className="text-3xl font-bold">Nhập mã xác thực</h1>
-                <p className="text-muted-foreground text-sm text-balance">
-                  Chúng tôi đã gửi mã 6 chữ số đến email của bạn
-                </p>
-              </div>
-
-              {/* OTP Input */}
-              <div className="space-y-2 w-full flex flex-col items-center">
-                <Label htmlFor="otp" className="sr-only">
-                  Verification code
-                </Label>
+    <div className={cn("flex flex-col gap-6", className)}>
+      <Card>
+        <CardHeader className="text-center">
+           <div className="flex justify-center mb-4">
+             <Link href="/">
+                <Image
+                  src="/logo.svg"
+                  alt="Kogu Express"
+                  width={48}
+                  height={48}
+                  className="size-12"
+                  priority
+                />
+             </Link>
+          </div>
+          <CardTitle className="text-2xl">Nhập mã xác thực</CardTitle>
+          <CardDescription>
+            Nhập mã 6 chữ số đã gửi đến email của bạn
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={onSubmit}>
+            <div className="grid gap-6">
+              <div className="flex flex-col items-center gap-2">
+                <Label htmlFor="otp" className="sr-only">Password</Label>
                 <InputOTP
                   maxLength={6}
-                  id="otp"
-                  name="otp"
                   value={otp}
                   onChange={(value) => setOtp(value)}
-                  containerClassName="gap-2"
                 >
                   <InputOTPGroup>
                     <InputOTPSlot index={0} />
@@ -185,56 +175,47 @@ export function OTPForm({ className, mode = "signup" }: OTPFormProps) {
                     <InputOTPSlot index={5} />
                   </InputOTPGroup>
                 </InputOTP>
-
                 {error && (
-                  <p className="text-destructive text-sm text-center">
-                    {error}
-                  </p>
+                   <p className="text-sm text-destructive mt-2">{error}</p>
                 )}
-
-                <p className="text-sm text-muted-foreground">
-                  Không nhận được mã?{" "}
-                  <button
-                    type="button"
-                    onClick={onResend}
-                    disabled={loading}
-                    className="text-primary underline underline-offset-4 hover:text-primary/80"
-                  >
-                    Gửi lại
-                  </button>
-                </p>
               </div>
-
-              {/* Submit Button */}
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? "Đang xác thực..." : "Xác thực"}
               </Button>
-
-              {/* Back Link */}
-              <div className="text-center text-sm">
-                <Link
+            </div>
+            <div className="mt-4 text-center text-sm">
+              Không nhận được mã?{" "}
+              <button
+                type="button"
+                className="underline underline-offset-4 hover:text-primary"
+                onClick={onResend}
+                disabled={resending}
+              >
+                Gửi lại
+              </button>
+            </div>
+            <div className="mt-2 text-center text-sm">
+               <Link
                   href={mode === "signup" ? "/signup" : "/forgot-password"}
                   className="underline underline-offset-4"
                 >
                   Quay lại
                 </Link>
-              </div>
             </div>
           </form>
-
-          {/* Right side image */}
-          <div className="relative hidden bg-muted md:block">
-            <Image
-              src="/placeholder.png"
-              alt="Image"
-              fill
-              className="object-cover"
-              priority
-              unoptimized
-            />
-          </div>
         </CardContent>
       </Card>
+      <div className="text-balance text-center text-xs text-muted-foreground">
+        Bằng cách tiếp tục, bạn đồng ý với{" "}
+        <Link href="#" className="underline underline-offset-4 hover:text-primary">
+          Điều khoản dịch vụ
+        </Link>{" "}
+        và{" "}
+        <Link href="#" className="underline underline-offset-4 hover:text-primary">
+          Chính sách bảo mật
+        </Link>
+        .
+      </div>
     </div>
   );
 }

@@ -3,6 +3,8 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuthStore } from "@/stores/useAuthStore";
+import { ManagerSidebar } from "@/components/layout/manager-sidebar";
+import { cn } from "@/lib/utils";
 
 export default function ManagerLayout({
   children,
@@ -10,11 +12,11 @@ export default function ManagerLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const pathname = usePathname();
-  const { loading, refreshTokenHandler, fetchMe, user } = useAuthStore();
+  const { loading, refreshTokenHandler, fetchMe } = useAuthStore();
   const [starting, setStarting] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const hasInitialized = useRef(false);
 
   useEffect(() => {
@@ -25,28 +27,25 @@ export default function ManagerLayout({
         let currentUser = currentState.user;
 
         if (currentToken) {
-          setIsAuthenticated(true);
-
-          if (!currentUser) {
-            await fetchMe();
-            currentUser = useAuthStore.getState().user;
-          }
-        } else {
-          await refreshTokenHandler();
-
-          const newState = useAuthStore.getState();
-          if (newState.accessToken) {
-            setIsAuthenticated(true);
-            if (!newState.user) {
+           setIsAuthenticated(true);
+           if (!currentUser) {
               await fetchMe();
-            }
-            currentUser = useAuthStore.getState().user;
-          } else {
-            setIsAuthenticated(false);
-          }
+              currentUser = useAuthStore.getState().user;
+           }
+        } else {
+           await refreshTokenHandler();
+           const newState = useAuthStore.getState();
+           if (newState.accessToken) {
+              setIsAuthenticated(true);
+              if (!newState.user) {
+                 await fetchMe();
+              }
+              currentUser = useAuthStore.getState().user;
+           } else {
+              setIsAuthenticated(false);
+           }
         }
 
-        // Check if user has manager or admin role
         if (currentUser && (currentUser.role === 'manager' || currentUser.role === 'admin')) {
           setIsAuthorized(true);
         } else {
@@ -61,15 +60,11 @@ export default function ManagerLayout({
       }
     };
 
-    if (hasInitialized.current) {
-      return;
-    }
-
+    if (hasInitialized.current) return;
     hasInitialized.current = true;
     init();
-  }, [pathname, refreshTokenHandler, fetchMe]);
+  }, [refreshTokenHandler, fetchMe]);
 
-  // Loading state
   if (starting || loading) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
@@ -81,21 +76,19 @@ export default function ManagerLayout({
     );
   }
 
-  // Not authenticated
   if (!isAuthenticated) {
     router.replace("/signin");
     return null;
   }
 
-  // Not authorized (not manager/admin)
   if (!isAuthorized) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4 text-center max-w-md p-8">
-          <div className="p-4 rounded-full bg-red-500/10">
+          <div className="p-4 rounded-full bg-destructive/10">
             <svg 
               xmlns="http://www.w3.org/2000/svg" 
-              className="h-12 w-12 text-red-500" 
+              className="h-12 w-12 text-destructive" 
               fill="none" 
               viewBox="0 0 24 24" 
               stroke="currentColor"
@@ -111,7 +104,6 @@ export default function ManagerLayout({
           <h1 className="text-2xl font-bold">Không có quyền truy cập</h1>
           <p className="text-muted-foreground">
             Bạn không có quyền truy cập vào khu vực quản lý. 
-            Vui lòng liên hệ quản trị viên nếu bạn cho rằng đây là lỗi.
           </p>
           <button
             onClick={() => router.push("/resident/home")}
@@ -124,5 +116,20 @@ export default function ManagerLayout({
     );
   }
 
-  return <>{children}</>;
+  return (
+    <div className="min-h-screen bg-background">
+      <ManagerSidebar collapsed={sidebarCollapsed} setCollapsed={setSidebarCollapsed} />
+      <main
+        className={cn(
+          "transition-all duration-300 min-h-screen",
+          sidebarCollapsed ? "ml-20" : "ml-64",
+          "p-6"
+        )}
+      >
+        <div className="max-w-7xl mx-auto animate-in fade-in duration-500">
+          {children}
+        </div>
+      </main>
+    </div>
+  );
 }

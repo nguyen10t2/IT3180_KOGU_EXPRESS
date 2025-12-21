@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ManagerDashboardLayout } from "@/components/layout";
+
 import {
   Card,
   CardContent,
@@ -266,7 +266,7 @@ export default function ManagerInvoicesPage() {
   });
 
   return (
-    <ManagerDashboardLayout>
+    <>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -685,6 +685,7 @@ export default function ManagerInvoicesPage() {
           </div>
         </div>
       )}
-    </ManagerDashboardLayout>
+
+    </>
   );
 }

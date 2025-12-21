@@ -28,7 +28,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuthStore } from "@/stores/useAuthStore";
-import { useState } from "react";
 
 const navigationItems = [
   {
@@ -68,11 +67,15 @@ const navigationItems = [
   },
 ];
 
-export function ManagerSidebar() {
+interface ManagerSidebarProps {
+  collapsed: boolean;
+  setCollapsed: (collapsed: boolean) => void;
+}
+
+export function ManagerSidebar({ collapsed, setCollapsed }: ManagerSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, signOut } = useAuthStore();
-  const [collapsed, setCollapsed] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
@@ -91,26 +94,26 @@ export function ManagerSidebar() {
   return (
     <aside
       className={cn(
-        "fixed left-0 top-0 h-screen bg-sidebar border-r border-sidebar-border flex flex-col transition-all duration-300",
+        "fixed left-0 top-0 h-screen bg-background border-r flex flex-col transition-all duration-300 z-50",
         collapsed ? "w-20" : "w-64"
       )}
     >
       {/* Logo */}
-      <div className="p-4 border-b border-sidebar-border flex items-center justify-between">
-        <Link href="/manager/dashboard" className="flex items-center gap-3">
+      <div className="p-4 border-b flex items-center justify-between h-16">
+        <Link href="/manager/dashboard" className="flex items-center gap-2 overflow-hidden">
           <Image
             src="/logo.svg"
-            alt="Building Logo"
-            width={40}
-            height={40}
-            className="shrink-0"
+            alt="Logo"
+            width={32}
+            height={32}
+            className="shrink-0 size-8"
           />
           {!collapsed && (
-            <div>
-              <span className="font-heading font-semibold text-lg text-sidebar-foreground">
+            <div className="flex flex-col truncate">
+              <span className="font-bold text-lg leading-none">
                 Kogu
               </span>
-              <span className="text-xs text-orange-500 ml-1 font-medium">Manager</span>
+              <span className="text-xs text-orange-500 font-medium">Manager</span>
             </div>
           )}
         </Link>
@@ -118,18 +121,18 @@ export function ManagerSidebar() {
           variant="ghost"
           size="icon"
           onClick={() => setCollapsed(!collapsed)}
-          className="hidden md:flex"
+          className="hidden md:flex ml-auto shrink-0 h-8 w-8"
         >
           {collapsed ? (
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="size-4" />
           ) : (
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="size-4" />
           )}
         </Button>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+      <nav className="flex-1 p-2 space-y-1 overflow-y-auto py-4">
         {navigationItems.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
           return (
@@ -137,15 +140,15 @@ export function ManagerSidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 px-4 py-3 rounded-lg transition-colors",
+                "flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-sm",
                 isActive
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                  : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                  ? "bg-orange-50 text-orange-600 font-medium dark:bg-orange-950/30 dark:text-orange-400"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
                 collapsed && "justify-center px-2"
               )}
               title={collapsed ? item.name : undefined}
             >
-              <item.icon className="w-5 h-5 shrink-0" />
+              <item.icon className="size-5 shrink-0" />
               {!collapsed && <span>{item.name}</span>}
             </Link>
           );
@@ -153,48 +156,49 @@ export function ManagerSidebar() {
       </nav>
 
       {/* User Section */}
-      <div className="p-4 border-t border-sidebar-border">
+      <div className="p-4 border-t">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button
+            <Button
+              variant="ghost"
               className={cn(
-                "flex items-center gap-3 w-full p-2 rounded-lg hover:bg-sidebar-accent transition-colors",
-                collapsed && "justify-center"
+                "w-full justify-start px-2 gap-2 h-auto py-2",
+                collapsed && "justify-center px-0"
               )}
             >
-              <Avatar className="h-9 w-9 shrink-0">
+              <Avatar className="size-8 shrink-0">
                 <AvatarImage src="" alt={user?.fullname || "User"} />
                 <AvatarFallback className="bg-orange-500 text-white">
                   {user?.fullname ? getInitials(user.fullname) : "M"}
                 </AvatarFallback>
               </Avatar>
               {!collapsed && (
-                <div className="flex-1 text-left min-w-0">
-                  <p className="text-sm font-medium text-sidebar-foreground truncate">
+                <div className="flex flex-col items-start min-w-0 flex-1">
+                  <span className="text-sm font-medium truncate w-full text-left">
                     {user?.fullname || "Manager"}
-                  </p>
-                  <p className="text-xs text-orange-500 truncate">
+                  </span>
+                  <span className="text-xs text-orange-500 truncate w-full text-left">
                     {user?.role === "admin" ? "Quản trị viên" : "Quản lý"}
-                  </p>
+                  </span>
                 </div>
               )}
-            </button>
+            </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuContent align="end" className="w-56" side={collapsed ? "right" : "bottom"}>
             <DropdownMenuLabel>Tài khoản quản lý</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link href="/manager/settings" className="flex items-center gap-2">
-                <Settings className="h-4 w-4" />
+              <Link href="/manager/settings" className="cursor-pointer">
+                <Settings className="mr-2 size-4" />
                 <span>Cài đặt</span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={handleSignOut}
-              className="text-destructive focus:text-destructive"
+              className="text-destructive focus:text-destructive cursor-pointer"
             >
-              <LogOut className="h-4 w-4 mr-2" />
+              <LogOut className="mr-2 size-4" />
               <span>Đăng xuất</span>
             </DropdownMenuItem>
           </DropdownMenuContent>

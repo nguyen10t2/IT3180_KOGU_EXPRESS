@@ -33,8 +33,6 @@ export const register = async (req, res) => {
 
         const password_hash = await argon2.hash(password);
 
-        await User.create({ email, password_hash, fullname });
-
         const { plain_otp, otp, expires_at } = await OtpService.createOtp();
 
         const insert = await Otp.create({
@@ -52,6 +50,12 @@ export const register = async (req, res) => {
             try {
                 await new EmailService().sendOtpEmail(email, plain_otp);
                 console.log(`Gửi OTP đến ${email}`);
+
+                await User.create({
+                    email: email,
+                    password_hash: password_hash,
+                    fullname: fullname,
+                });
             } catch (err) {
                 console.error(`Lỗi khi gửi OTP:`, err);
             }

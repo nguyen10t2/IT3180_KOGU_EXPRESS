@@ -2,7 +2,13 @@
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
@@ -36,128 +42,90 @@ export function SignUpForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)}>
-      <Card className="overflow-hidden p-0 border-border">
-        <CardContent className="grid p-0 md:grid-cols-2">
-          <form
-            className="p-4 md:p-6 w-full"
-            onSubmit={handleSubmit(onSubmit)}
-          >
-            <div className="flex flex-col gap-4">
-              {/* Header - Logo */}
-              <div className="flex flex-col items-center text-center gap-2">
-                <Link href="/" className="mx-auto block w-fit text-center">
-                  <Image
-                    src="/logo.svg"
-                    alt="logo"
-                    width={64}
-                    height={64}
-                    priority
-                  />
-                </Link>
-                <h1 className="text-2xl font-bold">Tạo tài khoản Kogu</h1>
+      <Card>
+        <CardHeader className="text-center">
+           <div className="flex justify-center mb-4">
+             <Link href="/">
+                <Image
+                  src="/logo.svg"
+                  alt="Kogu Express"
+                  width={48}
+                  height={48}
+                  className="size-12"
+                  priority
+                />
+             </Link>
+          </div>
+          <CardTitle className="text-2xl">Đăng ký tài khoản</CardTitle>
+          <CardDescription>
+            Nhập thông tin bên dưới để tạo tài khoản
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <div className="grid gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="fullname">Họ và tên</Label>
+                <Input
+                  id="fullname"
+                  placeholder="Nguyễn Văn A"
+                  {...register("fullname")}
+                />
+                {errors.fullname && (
+                  <p className="text-sm text-destructive">
+                    {errors.fullname.message}
+                  </p>
+                )}
               </div>
-
-              {/* Fullname */}
-              <div className="grid grid-cols-1 gap-2">
-                <div className="space-y-2">
-                  <Label htmlFor="fullname" className="block text-sm">
-                    Họ và tên
-                  </Label>
-                  <Input
-                    type="text"
-                    id="fullname"
-                    placeholder="Nguyễn Văn Kogu"
-                    {...register("fullname")}
-                  />
-                  {errors.fullname && (
-                    <p className="text-destructive text-sm">
-                      {errors.fullname.message}
-                    </p>
-                  )}
-                </div>
+              <div className="grid gap-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="name@example.com"
+                  {...register("email")}
+                />
+                {errors.email && (
+                  <p className="text-sm text-destructive">
+                    {errors.email.message}
+                  </p>
+                )}
               </div>
-
-              {/* Email */}
-              <div className="grid grid-cols-1 gap-2">
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="block text-sm">
-                    Tài khoản email
-                  </Label>
-                  <Input
-                    type="email"
-                    id="email"
-                    placeholder="kogu@kogu.com"
-                    {...register("email")}
-                  />
-                  {errors.email && (
-                    <p className="text-destructive text-sm">
-                      {errors.email.message}
-                    </p>
-                  )}
-                </div>
+              <div className="grid gap-2">
+                <Label htmlFor="password">Mật khẩu</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Mật khẩu của bạn"
+                  {...register("password")}
+                />
+                {errors.password && (
+                  <p className="text-sm text-destructive">
+                    {errors.password.message}
+                  </p>
+                )}
               </div>
-
-              {/* Password */}
-              <div className="grid grid-cols-1 gap-2">
-                <div className="space-y-2">
-                  <Label htmlFor="password" className="block text-sm">
-                    Mật khẩu
-                  </Label>
-                  <Input
-                    type="password"
-                    id="password"
-                    placeholder="••••••••"
-                    {...register("password")}
-                  />
-                  {errors.password && (
-                    <p className="text-destructive text-sm">
-                      {errors.password.message}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Submit Button */}
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={isSubmitting || isLoading}
-              >
-                {isSubmitting || isLoading
-                  ? "Đang tạo tài khoản..."
-                  : "Tạo tài khoản"}
+              <Button type="submit" className="w-full" disabled={isSubmitting || isLoading}>
+                {isSubmitting || isLoading ? "Đang tạo tài khoản..." : "Tạo tài khoản"}
               </Button>
-
-              <div className="text-center text-sm">
-                Đã có tài khoản?{" "}
-                <Link href="/signin" className="underline underline-offset-4">
-                  Đăng nhập
-                </Link>
-              </div>
+            </div>
+            <div className="mt-4 text-center text-sm">
+              Đã có tài khoản?{" "}
+              <Link href="/signin" className="underline underline-offset-4">
+                Đăng nhập
+              </Link>
             </div>
           </form>
-
-          <div className="bg-muted relative hidden md:block">
-            <Image
-              src="/placeholder.png"
-              alt="Image"
-              fill
-              className="object-cover"
-              priority
-              unoptimized
-            />
-          </div>
         </CardContent>
       </Card>
-
-      <div className="text-xs text-balance px-6 text-center text-muted-foreground">
+      <div className="text-balance text-center text-xs text-muted-foreground">
         Bằng cách tiếp tục, bạn đồng ý với{" "}
         <Link href="#" className="underline underline-offset-4 hover:text-primary">
           Điều khoản dịch vụ
         </Link>{" "}
         và{" "}
         <Link href="#" className="underline underline-offset-4 hover:text-primary">
-          Chính sách bảo mật của chúng tôi
+          Chính sách bảo mật
         </Link>
         .
       </div>

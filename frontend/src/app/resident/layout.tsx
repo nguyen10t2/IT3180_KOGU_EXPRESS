@@ -3,6 +3,8 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuthStore } from "@/stores/useAuthStore";
+import { Sidebar } from "@/components/layout/sidebar";
+import { cn } from "@/lib/utils";
 
 export default function ProtectedLayout({
   children,
@@ -14,42 +16,30 @@ export default function ProtectedLayout({
   const { loading, refreshTokenHandler, fetchMe } = useAuthStore();
   const [starting, setStarting] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const hasInitialized = useRef(false);
 
   useEffect(() => {
     const init = async () => {
       try {
-        // Get latest state from store
         const currentState = useAuthStore.getState();
         const currentToken = currentState.accessToken;
         const currentUser = currentState.user;
 
-        console.log(
-          "ProtectedRoute init - current token:",
-          currentToken ? "exists" : "null"
-        );
-
-        // If token exists (from localStorage), proceed
         if (currentToken) {
           setIsAuthenticated(true);
-
-          // Fetch user if not available
-          if (!currentUser) {
-            await fetchMe();
-          }
+          if (!currentUser) await fetchMe();
         } else {
-          console.log("No token found, attempting refresh...");
-          await refreshTokenHandler();
-
-          // Check again after refresh
-          const newState = useAuthStore.getState();
-          if (newState.accessToken) {
-            setIsAuthenticated(true);
-
-            if (!newState.user) {
-              await fetchMe();
+          try {
+            await refreshTokenHandler();
+            const newState = useAuthStore.getState();
+            if (newState.accessToken) {
+              setIsAuthenticated(true);
+              if (!newState.user) await fetchMe();
+            } else {
+              setIsAuthenticated(false);
             }
-          } else {
+          } catch {
             setIsAuthenticated(false);
           }
         }
@@ -61,25 +51,11 @@ export default function ProtectedLayout({
       }
     };
 
-    // Skip auth check for auth pages
-    if (
-      pathname === "/signin" ||
-      pathname === "/signup" ||
-      pathname === "/forgot-password"
-    ) {
-      setStarting(false);
-      return;
-    }
-
-    if (hasInitialized.current) {
-      return;
-    }
-
+    if (hasInitialized.current) return;
     hasInitialized.current = true;
     init();
-  }, [pathname, refreshTokenHandler, fetchMe]);
+  }, [refreshTokenHandler, fetchMe]);
 
-  // Loading state
   if (starting || loading) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
@@ -91,11 +67,25 @@ export default function ProtectedLayout({
     );
   }
 
-  // Not authenticated
   if (!isAuthenticated) {
     router.replace("/signin");
     return null;
   }
 
-  return <>{children}</>;
+  return (
+    <div className="min-h-screen bg-background">
+      <Sidebar collapsed={sidebarCollapsed} setCollapsed={setSidebarCollapsed} />
+      <main
+        className={cn(
+          "transition-all duration-300 min-h-screen",
+          sidebarCollapsed ? "ml-20" : "ml-64",
+          "p-6"
+        )}
+      >
+        <div className="max-w-7xl mx-auto animate-in fade-in duration-500">
+           {children}
+        </div>
+      </main>
+    </div>
+  );
 }

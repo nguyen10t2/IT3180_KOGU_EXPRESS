@@ -12,7 +12,7 @@ export const User = {
             LEFT JOIN residents r ON u.resident_id = r.resident_id
             LEFT JOIN house_holds h ON r.house_id = h.house_hold_id
             WHERE u.created_at > $1 AND u.role = 'resident' AND u.resident_id IS NOT NULL
-            ORDER BY u.user_id
+            ORDER BY u.created_at ASC
             LIMIT $2`,
             [lastCreated, limit]
         );

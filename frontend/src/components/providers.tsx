@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, type ReactNode } from "react";
+import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 interface ProvidersProps {
@@ -12,5 +13,14 @@ export function Providers({ children }: ProvidersProps) {
     useAuthStore.persist.rehydrate();
   }, []);
 
-  return <>{children}</>;
+  return (
+    <NextThemesProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+    >
+      {children}
+    </NextThemesProvider>
+  );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ManagerDashboardLayout } from "@/components/layout";
+
 import {
   Card,
   CardContent,
@@ -147,7 +147,7 @@ export default function ManagerFeedbacksPage() {
   });
 
   return (
-    <ManagerDashboardLayout>
+
       <div className="space-y-6">
         {/* Header */}
         <div>
@@ -346,6 +346,6 @@ export default function ManagerFeedbacksPage() {
           </CardContent>
         </Card>
       </div>
-    </ManagerDashboardLayout>
+
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { DashboardLayout } from "@/components/layout";
+
 import { useAuthStore } from "@/stores/useAuthStore";
 import { residentService, Resident, HouseHold, CreateResidentData, GetMyResidentResponse } from "@/services/residentService";
 import {
@@ -473,229 +473,227 @@ export default function AccountPage() {
   );
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Thông tin cá nhân</h1>
-          <p className="text-muted-foreground">
-            Xem và quản lý thông tin cá nhân của bạn
-          </p>
-        </div>
+    <div className="space-y-6">
+      {/* Header */}
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Thông tin cá nhân</h1>
+        <p className="text-muted-foreground">
+          Xem và quản lý thông tin cá nhân của bạn
+        </p>
+      </div>
 
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        ) : (
-          <div className="grid gap-6 md:grid-cols-3">
-            {/* Profile Card */}
-            <Card className="md:col-span-1">
-              <CardHeader className="text-center">
-                <div className="flex justify-center mb-4">
-                  <Avatar className="h-24 w-24">
-                    <AvatarImage src="" alt={user?.fullname || "User"} />
-                    <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
-                      {user?.fullname ? getInitials(user.fullname) : "U"}
-                    </AvatarFallback>
-                  </Avatar>
-                </div>
-                <CardTitle>{resident?.fullname || user?.fullname || "Người dùng"}</CardTitle>
-                <CardDescription>{user?.email}</CardDescription>
-                <div className="pt-2 flex flex-wrap justify-center gap-2">
-                  <Badge variant="secondary">
-                    {user?.role ? getRoleLabel(user.role) : "Cư dân"}
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      ) : (
+        <div className="grid gap-6 md:grid-cols-3">
+          {/* Profile Card */}
+          <Card className="md:col-span-1">
+            <CardHeader className="text-center">
+              <div className="flex justify-center mb-4">
+                <Avatar className="h-24 w-24">
+                  <AvatarImage src="" alt={user?.fullname || "User"} />
+                  <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
+                    {user?.fullname ? getInitials(user.fullname) : "U"}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+              <CardTitle>{resident?.fullname || user?.fullname || "Người dùng"}</CardTitle>
+              <CardDescription>{user?.email}</CardDescription>
+              <div className="pt-2 flex flex-wrap justify-center gap-2">
+                <Badge variant="secondary">
+                  {user?.role ? getRoleLabel(user.role) : "Cư dân"}
+                </Badge>
+                {isUserNotActive ? (
+                  <Badge variant={isUserRejected ? "destructive" : "warning"}>
+                    {isUserPending ? "Chờ duyệt" : "Bị từ chối"}
                   </Badge>
-                  {isUserNotActive ? (
-                    <Badge variant={isUserRejected ? "destructive" : "warning"}>
-                      {isUserPending ? "Chờ duyệt" : "Bị từ chối"}
-                    </Badge>
-                  ) : (
-                    <Badge variant="success">Đã kích hoạt</Badge>
-                  )}
-                  {resident && (
-                    <Badge variant={getStatusLabel(resident.status).variant}>
-                      {getStatusLabel(resident.status).label}
-                    </Badge>
-                  )}
+                ) : (
+                  <Badge variant="success">Đã kích hoạt</Badge>
+                )}
+                {resident && (
+                  <Badge variant={getStatusLabel(resident.status).variant}>
+                    {getStatusLabel(resident.status).label}
+                  </Badge>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 text-sm">
+                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">Email đã xác thực</span>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
+                <div className="flex items-center gap-3 text-sm">
+                  <Shield className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">
+                    Trạng thái: {user?.status === "active" ? "Hoạt động" : user?.status === "pending" ? "Chờ duyệt" : "Bị từ chối"}
+                  </span>
+                </div>
+                {resident?.room_number && (
                   <div className="flex items-center gap-3 text-sm">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-muted-foreground">Email đã xác thực</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm">
-                    <Shield className="h-4 w-4 text-muted-foreground" />
+                    <Home className="h-4 w-4 text-muted-foreground" />
                     <span className="text-muted-foreground">
-                      Trạng thái: {user?.status === "active" ? "Hoạt động" : user?.status === "pending" ? "Chờ duyệt" : "Bị từ chối"}
+                      Phòng {resident.room_number} {resident.floor ? `- Tầng ${resident.floor}` : ""}
                     </span>
                   </div>
-                  {resident?.room_number && (
-                    <div className="flex items-center gap-3 text-sm">
-                      <Home className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-muted-foreground">
-                        Phòng {resident.room_number} {resident.floor ? `- Tầng ${resident.floor}` : ""}
-                      </span>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Content based on status */}
+          {isUserPending && !resident && !isCreating && renderPendingNotice()}
+          {isUserPending && !resident && isCreating && renderCreateResidentForm()}
+          {isUserPending && resident && renderPendingApproval()}
+          {isUserRejected && renderRejectedNotice()}
+
+          {/* Info Card - Chỉ hiện khi user active hoặc có resident và đang chờ duyệt */}
+          {((!isUserNotActive && resident) || (isUserPending && resident)) && (
+            <Card className="md:col-span-2">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Thông tin chi tiết</CardTitle>
+                  <CardDescription>
+                    Thông tin cư dân của bạn
+                  </CardDescription>
+                </div>
+                {!isUserNotActive && !isEditing ? (
+                  <Button variant="outline" onClick={() => setIsEditing(true)}>
+                    Chỉnh sửa
+                  </Button>
+                ) : !isUserNotActive && isEditing ? (
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={handleCancel} disabled={saving}>
+                      <X className="h-4 w-4 mr-1" />
+                      Hủy
+                    </Button>
+                    <Button size="sm" onClick={handleSave} disabled={saving}>
+                      {saving ? (
+                        <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                      ) : (
+                        <Save className="h-4 w-4 mr-1" />
+                      )}
+                      Lưu
+                    </Button>
+                  </div>
+                ) : null}
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {resident && (
+                  <>
+                    {/* Thông tin cơ bản - không thể sửa */}
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label className="text-muted-foreground">Họ và tên</Label>
+                        <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50">
+                          <UserIcon className="h-4 w-4 text-muted-foreground" />
+                          <span>{resident.fullname}</span>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-muted-foreground">CCCD/CMND</Label>
+                        <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50">
+                          <CreditCard className="h-4 w-4 text-muted-foreground" />
+                          <span>{resident.id_card || "Chưa cập nhật"}</span>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-muted-foreground">Ngày sinh</Label>
+                        <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50">
+                          <Calendar className="h-4 w-4 text-muted-foreground" />
+                          <span>{formatDate(resident.date_of_birth)}</span>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-muted-foreground">Giới tính</Label>
+                        <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50">
+                          <UserIcon className="h-4 w-4 text-muted-foreground" />
+                          <span>{getGenderLabel(resident.gender)}</span>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-muted-foreground">Vai trò trong hộ</Label>
+                        <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50">
+                          <Home className="h-4 w-4 text-muted-foreground" />
+                          <span>{getHouseRoleLabel(resident.role)}</span>
+                        </div>
+                      </div>
+                      {resident.registration_date && (
+                        <div className="space-y-2">
+                          <Label className="text-muted-foreground">Ngày đăng ký</Label>
+                          <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50">
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                            <span>{formatDate(resident.registration_date)}</span>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  )}
+
+                    <Separator />
+
+                    {/* Thông tin có thể chỉnh sửa */}
+                    <div>
+                      <h3 className="text-sm font-medium mb-4 text-muted-foreground">
+                        Thông tin liên hệ {!isUserNotActive && "(có thể chỉnh sửa)"}
+                      </h3>
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label htmlFor="phone">Số điện thoại</Label>
+                          {isEditing && !isUserNotActive ? (
+                            <Input
+                              id="phone"
+                              value={phoneNumber}
+                              onChange={(e) => setPhoneNumber(e.target.value)}
+                              placeholder="Nhập số điện thoại"
+                            />
+                          ) : (
+                            <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50">
+                              <Phone className="h-4 w-4 text-muted-foreground" />
+                              <span>{resident.phone_number}</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="occupation">Nghề nghiệp</Label>
+                          {isEditing && !isUserNotActive ? (
+                            <Input
+                              id="occupation"
+                              value={occupation}
+                              onChange={(e) => setOccupation(e.target.value)}
+                              placeholder="Nhập nghề nghiệp"
+                            />
+                          ) : (
+                            <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50">
+                              <Briefcase className="h-4 w-4 text-muted-foreground" />
+                              <span>{resident.occupation || "Chưa cập nhật"}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Trường hợp user active nhưng chưa có resident (hiếm) */}
+          {!isUserNotActive && !resident && (
+            <Card className="md:col-span-2">
+              <CardContent className="py-8">
+                <div className="text-center">
+                  <UserIcon className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground">
+                    Bạn chưa có thông tin cư dân. Vui lòng liên hệ ban quản lý để được hỗ trợ.
+                  </p>
                 </div>
               </CardContent>
             </Card>
-
-            {/* Content based on status */}
-            {isUserPending && !resident && !isCreating && renderPendingNotice()}
-            {isUserPending && !resident && isCreating && renderCreateResidentForm()}
-            {isUserPending && resident && renderPendingApproval()}
-            {isUserRejected && renderRejectedNotice()}
-
-            {/* Info Card - Chỉ hiện khi user active hoặc có resident và đang chờ duyệt */}
-            {((!isUserNotActive && resident) || (isUserPending && resident)) && (
-              <Card className="md:col-span-2">
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <div>
-                    <CardTitle>Thông tin chi tiết</CardTitle>
-                    <CardDescription>
-                      Thông tin cư dân của bạn
-                    </CardDescription>
-                  </div>
-                  {!isUserNotActive && !isEditing ? (
-                    <Button variant="outline" onClick={() => setIsEditing(true)}>
-                      Chỉnh sửa
-                    </Button>
-                  ) : !isUserNotActive && isEditing ? (
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm" onClick={handleCancel} disabled={saving}>
-                        <X className="h-4 w-4 mr-1" />
-                        Hủy
-                      </Button>
-                      <Button size="sm" onClick={handleSave} disabled={saving}>
-                        {saving ? (
-                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                        ) : (
-                          <Save className="h-4 w-4 mr-1" />
-                        )}
-                        Lưu
-                      </Button>
-                    </div>
-                  ) : null}
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  {resident && (
-                    <>
-                      {/* Thông tin cơ bản - không thể sửa */}
-                      <div className="grid gap-4 md:grid-cols-2">
-                        <div className="space-y-2">
-                          <Label className="text-muted-foreground">Họ và tên</Label>
-                          <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50">
-                            <UserIcon className="h-4 w-4 text-muted-foreground" />
-                            <span>{resident.fullname}</span>
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-muted-foreground">CCCD/CMND</Label>
-                          <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50">
-                            <CreditCard className="h-4 w-4 text-muted-foreground" />
-                            <span>{resident.id_card || "Chưa cập nhật"}</span>
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-muted-foreground">Ngày sinh</Label>
-                          <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50">
-                            <Calendar className="h-4 w-4 text-muted-foreground" />
-                            <span>{formatDate(resident.date_of_birth)}</span>
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-muted-foreground">Giới tính</Label>
-                          <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50">
-                            <UserIcon className="h-4 w-4 text-muted-foreground" />
-                            <span>{getGenderLabel(resident.gender)}</span>
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-muted-foreground">Vai trò trong hộ</Label>
-                          <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50">
-                            <Home className="h-4 w-4 text-muted-foreground" />
-                            <span>{getHouseRoleLabel(resident.role)}</span>
-                          </div>
-                        </div>
-                        {resident.registration_date && (
-                          <div className="space-y-2">
-                            <Label className="text-muted-foreground">Ngày đăng ký</Label>
-                            <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50">
-                              <Calendar className="h-4 w-4 text-muted-foreground" />
-                              <span>{formatDate(resident.registration_date)}</span>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      <Separator />
-
-                      {/* Thông tin có thể chỉnh sửa */}
-                      <div>
-                        <h3 className="text-sm font-medium mb-4 text-muted-foreground">
-                          Thông tin liên hệ {!isUserNotActive && "(có thể chỉnh sửa)"}
-                        </h3>
-                        <div className="grid gap-4 md:grid-cols-2">
-                          <div className="space-y-2">
-                            <Label htmlFor="phone">Số điện thoại</Label>
-                            {isEditing && !isUserNotActive ? (
-                              <Input
-                                id="phone"
-                                value={phoneNumber}
-                                onChange={(e) => setPhoneNumber(e.target.value)}
-                                placeholder="Nhập số điện thoại"
-                              />
-                            ) : (
-                              <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50">
-                                <Phone className="h-4 w-4 text-muted-foreground" />
-                                <span>{resident.phone_number}</span>
-                              </div>
-                            )}
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="occupation">Nghề nghiệp</Label>
-                            {isEditing && !isUserNotActive ? (
-                              <Input
-                                id="occupation"
-                                value={occupation}
-                                onChange={(e) => setOccupation(e.target.value)}
-                                placeholder="Nhập nghề nghiệp"
-                              />
-                            ) : (
-                              <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50">
-                                <Briefcase className="h-4 w-4 text-muted-foreground" />
-                                <span>{resident.occupation || "Chưa cập nhật"}</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Trường hợp user active nhưng chưa có resident (hiếm) */}
-            {!isUserNotActive && !resident && (
-              <Card className="md:col-span-2">
-                <CardContent className="py-8">
-                  <div className="text-center">
-                    <UserIcon className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground">
-                      Bạn chưa có thông tin cư dân. Vui lòng liên hệ ban quản lý để được hỗ trợ.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        )}
-      </div>
-    </DashboardLayout>
+          )}
+        </div>
+      )}
+    </div>
   );
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ManagerDashboardLayout } from "@/components/layout";
 import { useAuthStore } from "@/stores/useAuthStore";
 import {
   Card,
@@ -124,7 +123,6 @@ export default function ManagerDashboardPage() {
   ];
 
   return (
-    <ManagerDashboardLayout>
       <div className="space-y-6">
         {/* Header */}
         <div className="space-y-2">
@@ -314,6 +312,5 @@ export default function ManagerDashboardPage() {
           </>
         )}
       </div>
-    </ManagerDashboardLayout>
   );
 }

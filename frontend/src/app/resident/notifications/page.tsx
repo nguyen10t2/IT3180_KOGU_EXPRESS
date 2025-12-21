@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { DashboardLayout } from "@/components/layout";
+
 import { useAuthStore } from "@/stores/useAuthStore";
 import { notificationService, Notification } from "@/services/notificationService";
 import {
@@ -107,128 +107,126 @@ export default function NotificationsPage() {
   };
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Thông báo</h1>
-            <p className="text-muted-foreground">
-              Cập nhật tin tức và thông báo mới nhất
-            </p>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Bell className="h-5 w-5 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">
-                {unreadCount} chưa đọc
-              </span>
-            </div>
-            {unreadCount > 0 && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleMarkAllAsRead}
-                disabled={markingAll}
-                className="flex items-center gap-2"
-              >
-                {markingAll ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <CheckCheck className="h-4 w-4" />
-                )}
-                Đánh dấu tất cả đã đọc
-              </Button>
-            )}
-          </div>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Thông báo</h1>
+          <p className="text-muted-foreground">
+            Cập nhật tin tức và thông báo mới nhất
+          </p>
         </div>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Bell className="h-5 w-5 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">
+              {unreadCount} chưa đọc
+            </span>
+          </div>
+          {unreadCount > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleMarkAllAsRead}
+              disabled={markingAll}
+              className="flex items-center gap-2"
+            >
+              {markingAll ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <CheckCheck className="h-4 w-4" />
+              )}
+              Đánh dấu tất cả đã đọc
+            </Button>
+          )}
+        </div>
+      </div>
 
-        {/* Notice for inactive users */}
-        {isUserNotActive && (
-          <Card className="border-orange-500/50 bg-orange-50 dark:bg-orange-950/20">
-            <CardContent className="py-4">
-              <div className="flex items-center gap-3">
-                <AlertCircle className="h-5 w-5 text-orange-500" />
-                <p className="text-sm text-orange-700 dark:text-orange-400">
-                  {isUserPending 
-                    ? "Tài khoản đang chờ duyệt. Bạn chỉ nhận được thông báo chung, thông báo hộ gia đình sẽ được hiển thị sau khi được duyệt."
-                    : "Tài khoản bị từ chối. Vui lòng liên hệ ban quản lý để biết thêm chi tiết."}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+      {/* Notice for inactive users */}
+      {isUserNotActive && (
+        <Card className="border-orange-500/50 bg-orange-50 dark:bg-orange-950/20">
+          <CardContent className="py-4">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="h-5 w-5 text-orange-500" />
+              <p className="text-sm text-orange-700 dark:text-orange-400">
+                {isUserPending 
+                  ? "Tài khoản đang chờ duyệt. Bạn chỉ nhận được thông báo chung, thông báo hộ gia đình sẽ được hiển thị sau khi được duyệt."
+                  : "Tài khoản bị từ chối. Vui lòng liên hệ ban quản lý để biết thêm chi tiết."}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-        {/* Notifications List */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Tất cả thông báo</CardTitle>
-            <CardDescription>
-              Danh sách các thông báo của bạn
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {loading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
-            ) : notifications.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <Bell className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>Không có thông báo nào</p>
-              </div>
-            ) : (
-              notifications.map((notification) => (
-                <div
-                  key={notification.notification_id}
-                  onClick={() => !notification.read && handleMarkAsRead(notification.notification_id)}
-                  className={`flex gap-4 p-4 rounded-lg border transition-colors ${
-                    notification.read
-                      ? "bg-background"
-                      : "bg-muted/50 border-primary/20 cursor-pointer hover:bg-muted"
-                  }`}
-                >
-                  <div className="shrink-0 mt-1">{getIcon(notification.type)}</div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-center gap-2">
-                        <h4
-                          className={`font-medium ${
-                            !notification.read ? "text-foreground" : "text-muted-foreground"
-                          }`}
-                        >
-                          {notification.title}
-                        </h4>
-                        {notification.is_pinned && (
-                          <Pin className="h-3 w-3 text-primary" />
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        {!notification.read && (
-                          <span className="h-2 w-2 rounded-full bg-primary" />
-                        )}
-                      </div>
+      {/* Notifications List */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Tất cả thông báo</CardTitle>
+          <CardDescription>
+            Danh sách các thông báo của bạn
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : notifications.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <Bell className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>Không có thông báo nào</p>
+            </div>
+          ) : (
+            notifications.map((notification) => (
+              <div
+                key={notification.notification_id}
+                onClick={() => !notification.read && handleMarkAsRead(notification.notification_id)}
+                className={`flex gap-4 p-4 rounded-lg border transition-colors ${
+                  notification.read
+                    ? "bg-background"
+                    : "bg-muted/50 border-primary/20 cursor-pointer hover:bg-muted"
+                }`}
+              >
+                <div className="shrink-0 mt-1">{getIcon(notification.type)}</div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <h4
+                        className={`font-medium ${
+                          !notification.read ? "text-foreground" : "text-muted-foreground"
+                        }`}
+                      >
+                        {notification.title}
+                      </h4>
+                      {notification.is_pinned && (
+                        <Pin className="h-3 w-3 text-primary" />
+                      )}
                     </div>
-                    <p className="text-sm text-muted-foreground mt-1 whitespace-pre-line">
-                      {notification.content}
-                    </p>
-                    <div className="flex items-center justify-between mt-2">
-                      <p className="text-xs text-muted-foreground">
-                        {formatTime(notification.published_at)}
-                      </p>
+                    <div className="flex items-center gap-2 shrink-0">
                       {!notification.read && (
-                        <span className="text-xs text-primary">
-                          Nhấn để đánh dấu đã đọc
-                        </span>
+                        <span className="h-2 w-2 rounded-full bg-primary" />
                       )}
                     </div>
                   </div>
+                  <p className="text-sm text-muted-foreground mt-1 whitespace-pre-line">
+                    {notification.content}
+                  </p>
+                  <div className="flex items-center justify-between mt-2">
+                    <p className="text-xs text-muted-foreground">
+                      {formatTime(notification.published_at)}
+                    </p>
+                    {!notification.read && (
+                      <span className="text-xs text-primary">
+                        Nhấn để đánh dấu đã đọc
+                      </span>
+                    )}
+                  </div>
                 </div>
-              ))
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    </DashboardLayout>
+              </div>
+            ))
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }
